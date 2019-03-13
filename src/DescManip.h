@@ -36,7 +36,7 @@ public:
    * @return distance
    */
    static double distance(const cv::Mat &a, const cv::Mat &b);
-   static  inline uint64_t distance_8uc1(const cv::Mat &a, const cv::Mat &b);
+   static  inline uint32_t distance_8uc1(const cv::Mat &a, const cv::Mat &b);
 
   /**
    * Returns a string version of the descriptor
@@ -78,42 +78,54 @@ public:
 std::string type2str(int type);
 
 
-uint64_t DescManip::distance_8uc1(const cv::Mat &a, const cv::Mat &b) {
+uint32_t DescManip::distance_8uc1(const cv::Mat &a, const cv::Mat &b) {
   //binary descriptor
 
   // Bit count function got from:
   // http://graphics.stanford.edu/~seander/bithacks.html#countbitssetkernighan
 
-  if (a.type() != CV_8UC1) {
-    throw std::runtime_error("The first descriptor's type must be CV_8UC1.");
-  }
-  if (b.type() != CV_8UC1) {
-    throw std::runtime_error("The first descriptor's type must be CV_8UC1.");
-  }
-  assert(a.cols == b.cols);
+//  if (a.type() != CV_8UC1) {
+//    throw std::runtime_error("The first descriptor's type must be CV_8UC1.");
+//  }
+//  if (b.type() != CV_8UC1) {
+//    throw std::runtime_error("The first descriptor's type must be CV_8UC1.");
+//  }
+//  assert(a.cols == b.cols);
+//  assert(a.rows == b.rows && a.rows == 1);
   // This implementation assumes that a.cols (CV_8U) % sizeof(uint64_t) == 0
-  assert(a.cols % sizeof(uint64_t) == 0);
+//  assert(a.cols % sizeof(uint64_t) == 0);
 
   const uint64_t *pa, *pb;
   pa = a.ptr<uint64_t>(); // a & b are actually CV_8U
   pb = b.ptr<uint64_t>();
+//  const uint8_t *pa, *pb;
+//  pa = a.ptr<uint8_t>(); // a & b are actually CV_8U
+//  pb = b.ptr<uint8_t>();
 
 //  std::cout << "(" << a.rows << ", " << a.cols << "), (" << b.rows << ", " << b.cols << ")" << std::endl;
 
   uint64_t v, ret = 0;
-  size_t n = a.cols / sizeof(uint64_t);
+  int n = a.cols / sizeof(uint64_t);
+  // The vanilla version which doesn't rely on weird bit manipulations.
+//  for (int i = 0; i < n; ++i, ++pa, ++pb) {
+//    ret += __builtin_popcountl(pa[i] ^ pb[i]);
+//  }
+//  return ret;
+
+  // This loop basically counts the number of bits that the two binary descriptors have in common.
+  // We do it un chunks of 64 bits instead of 8 bits for performance reasons.
   for (size_t i = 0; i < n; ++i, ++pa, ++pb) {
-//    std::cout << "Bit compute step " << i << "/" << n << "." << std::endl;
     v = (*pa) ^ (*pb);
-    ret += v;   // meaningless; just for test
-//    v = v - ((v >> 1) & (uint64_t) ~(uint64_t) 0 / 3);
-//    v = (v & (uint64_t) ~(uint64_t) 0 / 15 * 3) + ((v >> 2) &
-//        (uint64_t) ~(uint64_t) 0 / 15 * 3);
-//    v = (v + (v >> 4)) & (uint64_t) ~(uint64_t) 0 / 255 * 15;
-//    ret += (uint64_t) (v * ((uint64_t) ~(uint64_t) 0 / 255)) >>
-//                                                             (sizeof(uint64_t) - 1) * CHAR_BIT;
+    v = v - ((v >> 1) & (uint64_t) ~(uint64_t) 0 / 3);
+    v = (v & (uint64_t) ~(uint64_t) 0 / 15 * 3) + ((v >> 2) &
+        (uint64_t) ~(uint64_t) 0 / 15 * 3);
+    v = (v + (v >> 4)) & (uint64_t) ~(uint64_t) 0 / 255 * 15;
+//    ret += v;   // meaningless; just for test
+    ret += (uint64_t) (v * ((uint64_t) ~(uint64_t) 0 / 255)) >>
+                                                             (sizeof(uint64_t) - 1) * CHAR_BIT;
   }
-  return ret;
+//  return ret;
+  return static_cast<uint32_t>(ret);    // ret is a count, so definitely fits in 32 bits
 }
 
 } // namespace DBoW3
