@@ -84,8 +84,13 @@ EntryId Database::add(
   BowVector *bowvec, FeatureVector *fvec)
 {
     std::vector<cv::Mat> vf(features.rows);
-    for(int r=0;r<features.rows;r++) vf[r]=features.rowRange(r,r+1);
-    return add(vf,bowvec,fvec);
+    for(int r=0;r<features.rows;r++) {
+      vf[r] = features.rowRange(r, r + 1);
+    }
+
+    std::cout << "Prepared features; now doing main add logic." << std::endl;
+    std::cout << "WAT" << std::endl;
+    return add(vf, bowvec, fvec);
 }
 
 EntryId Database::add(
@@ -95,6 +100,14 @@ EntryId Database::add(
   BowVector aux;
   BowVector& v = (bowvec ? *bowvec : aux);
 
+  std::cout << "In main Database::add method....." << std::endl;
+  if (! bowvec) {
+    std::cout << "Empty BoW vector" << std::endl;
+  }
+  if (! fvec) {
+    std::cout << "Empty feature vector" << std::endl;
+  }
+
   if(m_use_di && fvec != NULL)
   {
     m_voc->transform(features, v, *fvec, m_dilevels); // with features
@@ -102,6 +115,7 @@ EntryId Database::add(
   }
   else if(m_use_di)
   {
+    std::cout << "Should create feature vector..." << std::endl;
     FeatureVector fv;
     m_voc->transform(features, v, fv, m_dilevels); // with features
     return add(v, fv);
@@ -113,7 +127,10 @@ EntryId Database::add(
   }
   else
   {
+    std::cout << "No DI, just passing features and returning EntryID." << std::endl;
     m_voc->transform(features, v); // with features
+
+    std::cout << "Transform OK, problem must be in add(bowVec)" << std::endl;
     return add(v);
   }
 }

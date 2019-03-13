@@ -615,6 +615,7 @@ WordId Vocabulary::transform
 {
   if(empty())
   {
+    std::cout << "Warning, cannot transform feature because the vocabulary is empty!" << std::endl;
     return 0;
   }
 
@@ -880,15 +881,13 @@ void Vocabulary::transform(const cv::Mat &feature,
 {
   // propagate the feature down the tree
 
-
   // level at which the node must be stored in nid, if given
-
   NodeId final_id = 0; // root
-//maximum speed by computing here distance and avoid calling to DescManip::distance
+  //maximum speed by computing here distance and avoid calling to DescManip::distance
 
   //binary descriptor
  // int ntimes=0;
-  if (feature.type()==CV_8U){
+  if (feature.type()==CV_8U) {
       do
       {
           auto const  &nodes = m_nodes[final_id].children;
@@ -897,8 +896,9 @@ void Vocabulary::transform(const cv::Mat &feature,
            for(const auto  &id:nodes)
           {
               //compute distance
-             //  std::cout<<idx<< " "<<id<<" "<< m_nodes[id].descriptor<<std::endl;
+//               std::cout<<idx<< " "<<id<<" "<< m_nodes[id].descriptor<<std::endl;
               uint64_t dist= DescManip::distance_8uc1(feature, m_nodes[id].descriptor);
+
               if(dist < best_d)
               {
                   best_d = dist;
@@ -907,7 +907,7 @@ void Vocabulary::transform(const cv::Mat &feature,
               }
               idx++;
           }
-        // std::cout<<bestidx<<" "<<final_id<<" d:"<<best_d<<" "<<m_nodes[final_id].descriptor<<  std::endl<<std::endl;
+//         std::cout<<bestidx<<" "<<final_id<<" d:"<<best_d<<" "<<m_nodes[final_id].descriptor<<  std::endl<<std::endl;
       } while( !m_nodes[final_id].isLeaf() );
    }
   else
@@ -915,13 +915,14 @@ void Vocabulary::transform(const cv::Mat &feature,
 	  do
 	  {
 		  auto const  &nodes = m_nodes[final_id].children;
-		  uint64_t best_d = std::numeric_limits<uint64_t>::max();
+		  double best_d = std::numeric_limits<double>::max();
 		  int idx = 0, bestidx = 0;
 		  for (const auto &id : nodes)
 		  {
 			  //compute distance
 			  //  std::cout<<idx<< " "<<id<<" "<< m_nodes[id].descriptor<<std::endl;
-			  uint64_t dist = DescManip::distance(feature, m_nodes[id].descriptor);
+			  // XXX(andreib): Remove 8uc1 logic handling from this function.
+			  double dist = DescManip::distance(feature, m_nodes[id].descriptor);
 			  //std::cout << id << " " << dist << " " << best_d << std::endl;
 			  if (dist < best_d)
 			  {

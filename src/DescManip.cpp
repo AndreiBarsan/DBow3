@@ -72,16 +72,16 @@ void DescManip::meanValue(const std::vector<cv::Mat> &descriptors,
             if(i % 8 == 7) ++p;
         }
     }
-    //non binary descriptor
     else{
-        assert(descriptors[0].type()==CV_32F );//ensure it is float
+        // Non-binary descriptor
+        assert(descriptors[0].type() == CV_32F);    //ensure it is float
 
         mean.create(1, descriptors[0].cols,descriptors[0].type());
         mean.setTo(cv::Scalar::all(0));
-        float inv_s =1./double( descriptors.size());
-        for(size_t i=0;i<descriptors.size();i++)
-            mean +=  descriptors[i] * inv_s;
-
+        double inv_s = 1.0 / double(descriptors.size());
+        for (const auto &descriptor : descriptors) {
+            mean += descriptor * inv_s;
+        }
     }
 
 }
@@ -94,6 +94,7 @@ double DescManip::distance(const cv::Mat &a,  const cv::Mat &b)
 
     //binary descriptor
     if (a.type()==CV_8U){
+        std::cout << "WTF are we doing here??" << std::endl;
 
         // Bit count function got from:
          // http://graphics.stanford.edu/~seander/bithacks.html#CountBitsSetKernighan
@@ -269,5 +270,27 @@ void DescManip::fromStream(cv::Mat &m,std::istream &str){
 
 // --------------------------------------------------------------------------
 
+std::string type2str(int type) {
+    std::string r;
+
+    uchar depth = type & CV_MAT_DEPTH_MASK;
+    uchar chans = 1 + (type >> CV_CN_SHIFT);
+
+    switch ( depth ) {
+        case CV_8U:  r = "8U"; break;
+        case CV_8S:  r = "8S"; break;
+        case CV_16U: r = "16U"; break;
+        case CV_16S: r = "16S"; break;
+        case CV_32S: r = "32S"; break;
+        case CV_32F: r = "32F"; break;
+        case CV_64F: r = "64F"; break;
+        default:     r = "User"; break;
+    }
+
+    r += "C";
+    r += (chans+'0');
+
+    return r;
+}
 } // namespace DBoW3
 

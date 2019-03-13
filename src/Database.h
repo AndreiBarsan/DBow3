@@ -65,18 +65,18 @@ public:
    * Creates the database from a file
    * @param filename
    */
-  Database(const std::string &filename);
+  explicit Database(const std::string &filename);
 
   /** 
    * Creates the database from a file
    * @param filename
    */
-  Database(const char *filename);
+  explicit Database(const char *filename);
 
   /**
    * Destructor
    */
-  virtual ~Database(void);
+  virtual ~Database();
 
   /**
    * Copies the given database and its vocabulary
