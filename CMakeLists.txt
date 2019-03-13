@@ -188,7 +188,7 @@ IF(CMAKE_COMPILER_IS_GNUCXX OR MINGW)
     endif()
 
 
-    set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} -DNDEBUG   ")
+    set(EXTRA_C_FLAGS_RELEASE "${EXTRA_C_FLAGS_RELEASE} -DNDEBUG -march=native")
     set(EXTRA_C_FLAGS_DEBUG "-g3 -O0 -DDEBUG -D_DEBUG -W -Wextra -Wno-return-type   ")
 
     MESSAGE( STATUS "-------------------------------------------------------------------------------" )
