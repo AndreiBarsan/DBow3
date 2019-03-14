@@ -634,11 +634,11 @@ void Vocabulary::transform(
     //    transform(vf,v);
 
 
-
     v.clear();
 
     if(empty())
     {
+        std::cout << "Warning: Attempting to transform with empty vocabulary!" << std::endl;
         return;
     }
 
@@ -656,7 +656,9 @@ void Vocabulary::transform(
             // w is the idf value if TF_IDF, 1 if TF
             transform(features.row(r), id, w);
             // not stopped
-            if(w > 0)  v.addWeight(id, w);
+            if(w > 0)  {
+              v.addWeight(id, w);
+            }
         }
 
         if(!v.empty() && !must)
@@ -679,7 +681,9 @@ void Vocabulary::transform(
             transform(features.row(r), id, w);
 
             // not stopped
-            if(w > 0) v.addIfNotExist(id, w);
+            if(w > 0) {
+              v.addIfNotExist(id, w);
+            }
 
         } // if add_features
     } // if m_weighting == ...
@@ -703,6 +707,7 @@ void Vocabulary::transform(
   // normalize
   LNorm norm;
   bool must = m_scoring_object->mustNormalize(norm);
+  std::cout << "Must normalize? " << must << std::endl;
 
 
   if(m_weighting == TF || m_weighting == TF_IDF)
@@ -712,18 +717,19 @@ void Vocabulary::transform(
       WordId id;
       WordValue w;
       // w is the idf value if TF_IDF, 1 if TF
-
       transform(*fit, id, w);
 
       // not stopped
-      if(w > 0) v.addWeight(id, w);
+      if(w > 0) {
+        v.addWeight(id, w);
+      }
     }
 
     if(!v.empty() && !must)
     {
       // unnecessary when normalizing
       const double nd = v.size();
-      for(BowVector::iterator vit = v.begin(); vit != v.end(); vit++)
+      for (BowVector::iterator vit = v.begin(); vit != v.end(); vit++)
         vit->second /= nd;
     }
 
@@ -739,7 +745,9 @@ void Vocabulary::transform(
       transform(*fit, id, w);
 
       // not stopped
-      if(w > 0) v.addIfNotExist(id, w);
+      if(w > 0) {
+        v.addIfNotExist(id, w);
+      }
 
     } // if add_features
   } // if m_weighting == ...

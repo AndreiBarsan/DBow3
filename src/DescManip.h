@@ -70,7 +70,7 @@ public:
 };
 
 uint32_t DescManip::distance_8uc1(const cv::Mat &a, const cv::Mat &b) {
-  //binary descriptor
+  // binary descriptor
 
   if (a.type() != CV_8UC1) {
     throw std::runtime_error("The first descriptor's type must be CV_8UC1.");
