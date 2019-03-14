@@ -707,8 +707,6 @@ void Vocabulary::transform(
   // normalize
   LNorm norm;
   bool must = m_scoring_object->mustNormalize(norm);
-  std::cout << "Must normalize? " << must << std::endl;
-
 
   if(m_weighting == TF || m_weighting == TF_IDF)
   {
